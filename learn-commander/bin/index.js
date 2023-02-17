@@ -27,6 +27,11 @@ function parseInteger (value) {
   return value
 }
 
+function collect (value, previous) {
+  console.log(111, value, previous);
+  return previous.concat([value])
+}
+
 program
   .name('el-build')
   .description('build javascript project')
@@ -42,15 +47,18 @@ program
   .option('--first', 'display just the first substring')
   // []表示参数可传可不传
   .option('-a --add [char]', 'add something')
-  .option('- --separator <char>', 'separator char', ',')
+  .option('-s --separator <char>', 'separator char', ',')
+  // -l 后面的所有参数都会放到letters里，如果想分割需要用--
+  .option('-l --letter <letters...>', 'specify letters')
   .action((args, options) => {
+    console.log('今天在看的', args, options)
     console.log(program.optsWithGlobals())
     console.log(program.getOptionValue('debug'))
     const limit = options.first ? 1 :undefined
     console.log(args.split(options.separator, limit))
   })
 
-  program
+program
   .command('test')
   .addOption(new Option('-s, --select', 'select something').hideHelp())
   .addOption(new Option('-t, --time <delay>', 'time seconds').default(60, 'one minute'))
@@ -71,17 +79,20 @@ program
   .command('custom')
   .option('-f --float <number>', 'float argument', parseFloat)
   .option('-i --integer <number>', 'integer argument', parseInteger)
+  .option('-c --collect <value>', 'collect', collect, [])
   .action((options, cmd) => {
     console.log(cmd.optsWithGlobals())
   })
 
 program
+  // isDefault 为true时，不需要输入命令(login)
+  // .command('login <username> [password]', { hidden: false, isDefault: true }) 
   .command('login')
   // .argument('<username>', 'username to login')
   // .argument('[password]', 'password for user', 'no password')
   // .argument('<dir...>', 'test')
   // .arguments('<username> [password]')
-  .addArgument(new commander.Argument('username', 'username to login').argRequired())
+  .addArgument(new commander.Argument('username', 'username to login').argRequired().choices(['kangkang', 'kangkang2']))
   .addArgument(new commander.Argument('password', 'username to login').argOptional().default('123456', 'default password'))
   .action((username, password, options) => {
     console.log(username, password)
